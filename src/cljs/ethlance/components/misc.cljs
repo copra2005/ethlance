@@ -478,14 +478,28 @@
   "Note, all communication on Ethlance is unencrypted on public blockchain. Please don't reveal any private information.")
 
 (defn how-it-works-app-bar-link [props & children]
-  (let [[props children] (u/parse-props-children props children)
-        mobile-coinbase-compatible? @(subscribe [::mobile-subs/coinbase-compatible?])]
+  (let [[props children] (u/parse-props-children props children)]
     [:div
      (r/merge-props
-       {:style {:margin-top 15 :text-align :right}}
-       props)
-     (if mobile-coinbase-compatible?
-       [:a {:href (:main-mobile-link constants/coinbase)}
+      {:style {:margin-top 15 :text-align :right}}
+      props)
+     [:a
+      {:href (u/path-for :how-it-works)}
+      [:h3.bolder
+       {:style styles/app-bar-link}
+       (or (first children) "How it works")]]]))
+
+
+(defn mobile-coinbase-app-bar-link []
+  (let [android? @(subscribe [::mobile-subs/android?])
+        ios? @(subscribe [::mobile-subs/ios?])
+        coinbase-mobile-store-link
+        (cond
+          (true? android?) (:android-mobile-link constants/coinbase)
+          (true? ios?) (:ios-mobile-link constants/coinbase)
+          :else (:main-mobile-link constants/coinbase))]
+    (fn []
+      [:a {:href coinbase-mobile-store-link}
         [:div {:style (merge styles/app-bar-link
                              {:display "flex" :align-items "center"})}
          [:span {:style {:color "white"
@@ -497,12 +511,8 @@
                         :border-radius "3px"
                         :margin-left "0.7em"
                         :margin-right "0.7em"}
-                :src "/images/coinbase-logo.png"}]]]
-       [:a
-        {:href (u/path-for :how-it-works)}
-        [:h3.bolder
-         {:style styles/app-bar-link}
-         (or (first children) "How it works")]])]))
+                :src "/images/coinbase-logo.png"}]]])))
+
 
 (defn- link [href text]
   [:a {:href href
